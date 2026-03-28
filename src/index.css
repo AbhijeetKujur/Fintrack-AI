@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --bg-app: #070618;
+  --bg-surface: #121036;
+  --bg-muted: #171547;
+  --text-primary: #eef1ff;
+  --text-secondary: #b8b9ea;
+  --accent: #7b5cff;
+  --accent-strong: #5d42d6;
+  --accent-soft: #1f1a56;
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased;
+    color: var(--text-primary);
+    background:
+      radial-gradient(980px 560px at -12% -28%, rgba(123, 92, 255, 0.3) 0%, transparent 52%),
+      radial-gradient(840px 500px at 112% 18%, rgba(0, 178, 255, 0.22) 0%, transparent 50%),
+      radial-gradient(760px 460px at 55% 110%, rgba(246, 77, 255, 0.2) 0%, transparent 52%),
+      linear-gradient(135deg, #060314 0%, #120d34 35%, #140f3d 68%, #070618 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .section-card {
+    position: relative;
+    background: linear-gradient(180deg, rgba(26, 20, 77, 0.94) 0%, rgba(15, 13, 53, 0.96) 100%);
+    border: 1px solid rgba(114, 102, 214, 0.42);
+    border-radius: 1.5rem;
+    box-shadow:
+      0 22px 42px -30px rgba(0, 0, 0, 0.85),
+      inset 0 1px 0 rgba(195, 186, 255, 0.22);
+    overflow: hidden;
+  }
+
+  .section-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(120deg, rgba(176, 153, 255, 0.24), transparent 36%);
+  }
+
+  .section-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .section-hover:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 24px 44px -26px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(149, 125, 255, 0.26),
+        inset 0 1px 0 rgba(195, 186, 255, 0.24);
+  }
+
+  .section-subcard {
+    background: rgba(21, 19, 64, 0.86);
+    border: 1px solid rgba(116, 109, 201, 0.32);
+    border-radius: 1.1rem;
+    box-shadow: 0 12px 28px -20px rgba(0, 0, 0, 0.75);
+  }
+
+  /* Ensure text remains readable on dark neon surfaces. */
+  .section-card h1,
+  .section-card h2,
+  .section-card h3,
+  .section-card h4,
+  .section-card h5,
+  .section-card h6,
+  .section-card strong,
+  .section-card th,
+  .section-card .font-bold,
+  .section-subcard h1,
+  .section-subcard h2,
+  .section-subcard h3,
+  .section-subcard h4,
+  .section-subcard h5,
+  .section-subcard h6,
+  .section-subcard strong,
+  .section-subcard th,
+  .section-subcard .font-bold {
+    color: #eef1ff;
+  }
+
+  .section-card p,
+  .section-card span,
+  .section-card td,
+  .section-card label,
+  .section-card li,
+  .section-card button,
+  .section-card small,
+  .section-subcard p,
+  .section-subcard span,
+  .section-subcard td,
+  .section-subcard label,
+  .section-subcard li,
+  .section-subcard button,
+  .section-subcard small {
+    color: #b8b9ea;
+  }
+}
+
+::selection {
+  background: rgba(123, 92, 255, 0.46);
+  color: #f5f7ff;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0b2a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #352f80;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4a43aa;
+}
+

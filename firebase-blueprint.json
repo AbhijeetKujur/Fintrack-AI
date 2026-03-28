@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "Expense": {
+      "title": "Expense",
+      "description": "A single financial transaction",
+      "type": "object",
+      "properties": {
+        "amount": { "type": "number", "description": "The transaction amount" },
+        "merchant": { "type": "string", "description": "The name of the merchant" },
+        "date": { "type": "string", "format": "date", "description": "The date of the transaction" },
+        "category": { "type": "string", "description": "The category of the expense" },
+        "description": { "type": "string", "description": "A brief description of the expense" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "A list of tags for the expense" },
+        "userId": { "type": "string", "description": "The ID of the user who owns the expense" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the expense was created" }
+      },
+      "required": ["amount", "merchant", "date", "category", "userId", "createdAt"]
+    },
+    "Budget": {
+      "title": "Budget",
+      "description": "A monthly budget for a specific category",
+      "type": "object",
+      "properties": {
+        "category": { "type": "string", "description": "The category for the budget" },
+        "amount": { "type": "number", "description": "The monthly budget amount" },
+        "period": { "type": "string", "enum": ["monthly"], "description": "The budget period" },
+        "userId": { "type": "string", "description": "The ID of the user who owns the budget" }
+      },
+      "required": ["category", "amount", "period", "userId"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Information about the user",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique ID of the user" },
+        "email": { "type": "string", "format": "email", "description": "The user's email address" },
+        "displayName": { "type": "string", "description": "The user's display name" },
+        "photoURL": { "type": "string", "description": "The user's profile photo URL" },
+        "monthlyBudget": { "type": "number", "description": "The user's total monthly budget" }
+      },
+      "required": ["uid", "email", "displayName"]
+    },
+    "Tag": {
+      "title": "Tag",
+      "description": "A custom tag for transactions",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the tag" },
+        "userId": { "type": "string", "description": "The ID of the user who owns the tag" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the tag was created" }
+      },
+      "required": ["name", "userId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Collection of all expenses"
+    },
+    "/budgets/{budgetId}": {
+      "schema": "Budget",
+      "description": "Collection of all budgets"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Collection of user profiles"
+    },
+    "/tags/{tagId}": {
+      "schema": "Tag",
+      "description": "Collection of custom tags"
+    }
+  }
+}

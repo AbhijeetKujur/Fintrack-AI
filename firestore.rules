@@ -1,0 +1,146 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (matches auth.uid)
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required, email format)
+    //   - displayName: string (required)
+    //   - photoURL: string (optional)
+    //   - monthlyBudget: number (optional)
+    //
+    // Collection: expenses
+    // Document ID: auto-generated
+    // Fields:
+    //   - amount: number (required, positive)
+    //   - merchant: string (required, max 100 chars)
+    //   - date: string (required, ISO 8601)
+    //   - category: string (required)
+    //   - description: string (optional, max 500 chars)
+    //   - tags: list (optional, max 10 items)
+    //   - userId: string (required, matches auth.uid)
+    //   - createdAt: string (required, ISO 8601)
+    //
+    // Collection: budgets
+    // Document ID: auto-generated
+    // Fields:
+    //   - category: string (required)
+    //   - amount: number (required, positive)
+    //   - period: string (required, 'monthly')
+    //   - userId: string (required, matches auth.uid)
+    //
+    // Collection: tags
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, max 50 chars)
+    //   - userId: string (required, matches auth.uid)
+    //   - createdAt: string (required, ISO 8601)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    function uidUnchanged() {
+      return !('userId' in request.resource.data) || request.resource.data.userId == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('userId' in request.resource.data) || request.resource.data.userId == resource.data.userId;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}.*");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.uid is string && data.uid == request.auth.uid &&
+             data.email is string && isValidEmail(data.email) &&
+             data.displayName is string && data.displayName.size() < 100;
+    }
+
+    function isValidExpense(data) {
+      return data.amount is number && data.amount >= 0 &&
+             data.merchant is string && data.merchant.size() < 100 &&
+             isValidDateString(data.date) &&
+             data.category is string &&
+             data.userId == request.auth.uid &&
+             isValidDateString(data.createdAt);
+    }
+
+    function isValidBudget(data) {
+      return data.category is string &&
+             data.amount is number && data.amount >= 0 &&
+             data.period == 'monthly' &&
+             data.userId == request.auth.uid;
+    }
+
+    function isValidTag(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
+             data.userId == request.auth.uid &&
+             isValidDateString(data.createdAt);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /expenses/{expenseId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && isValidExpense(request.resource.data);
+      allow update: if isDocOwner() && isValidExpense(request.resource.data) && uidNotModified();
+      allow delete: if isDocOwner();
+    }
+
+    match /budgets/{budgetId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && isValidBudget(request.resource.data);
+      allow update: if isDocOwner() && isValidBudget(request.resource.data) && uidNotModified();
+      allow delete: if isDocOwner();
+    }
+
+    match /tags/{tagId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && isValidTag(request.resource.data);
+      allow update: if isDocOwner() && isValidTag(request.resource.data) && uidNotModified();
+      allow delete: if isDocOwner();
+    }
+  }
+}
