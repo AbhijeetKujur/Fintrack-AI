@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Tag as TagIcon, Calendar, IndianRupee, Store, FileText } from 'lucide-react';
+import { Plus, Tag as TagIcon, Calendar, Store, FileText } from 'lucide-react';
 import { Expense, Tag } from '../types';
 import { CATEGORIES } from '../constants';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface ManualExpenseFormProps {
   onAddExpense: (expense: Partial<Expense>) => Promise<void>;
@@ -9,6 +10,7 @@ interface ManualExpenseFormProps {
 }
 
 export default function ManualExpenseForm({ onAddExpense, availableTags }: ManualExpenseFormProps) {
+  const { selectedCurrency } = useCurrency();
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -108,9 +110,9 @@ export default function ManualExpenseForm({ onAddExpense, availableTags }: Manua
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className={labelClass}>Amount (₹)</label>
+            <label className={labelClass}>Amount ({selectedCurrency.symbol})</label>
             <div className="relative">
-              <IndianRupee size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8b8dc9]" />
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8b8dc9] text-sm font-bold">{selectedCurrency.symbol}</span>
               <input
                 type="number"
                 step="0.01"

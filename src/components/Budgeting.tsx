@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, Check, X, PieChart, Target, Wallet } from 'lucide-
 import { motion, AnimatePresence } from 'motion/react';
 import { Budget, Expense } from '../types';
 import { CATEGORIES } from '../constants';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface BudgetingProps {
   budgets: Budget[];
@@ -12,6 +13,7 @@ interface BudgetingProps {
 }
 
 export default function Budgeting({ budgets, expenses, onAddBudget, onDeleteBudget }: BudgetingProps) {
+  const { formatAmount } = useCurrency();
   const [isAdding, setIsAdding] = useState(false);
   const [newBudget, setNewBudget] = useState<Partial<Budget>>({
     category: CATEGORIES[0],
@@ -41,12 +43,12 @@ export default function Budgeting({ budgets, expenses, onAddBudget, onDeleteBudg
             </div>
             <div>
               <p className="text-xs font-mono uppercase tracking-widest text-[#cfe0d7]">Total Monthly Budget</p>
-              <p className="text-3xl font-bold tracking-tight">₹{totalBudget.toLocaleString()}</p>
+              <p className="text-3xl font-bold tracking-tight">{formatAmount(totalBudget)}</p>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#d6e6de]">Spent: ₹{totalSpent.toLocaleString()}</span>
+              <span className="text-[#d6e6de]">Spent: {formatAmount(totalSpent)}</span>
               <span className="text-[#d6e6de]">{Math.round((totalSpent / totalBudget) * 100) || 0}%</span>
             </div>
             <div className="h-2 bg-white/10 rounded-full overflow-hidden">
@@ -65,8 +67,8 @@ export default function Budgeting({ budgets, expenses, onAddBudget, onDeleteBudg
               <Target size={24} className="text-[#1f6b55]" />
             </div>
             <div>
-              <p className="text-xs font-mono uppercase tracking-widest text-[#607066]">Remaining Balance</p>
-              <p className="text-3xl font-bold text-[#1e2a25] tracking-tight">₹{Math.max(totalBudget - totalSpent, 0).toLocaleString()}</p>
+              <p className="text-xs font-mono uppercase tracking-widest text-[#b8b9ea]">Remaining Balance</p>
+              <p className="text-3xl font-bold text-[#eef1ff] tracking-tight">{formatAmount(Math.max(totalBudget - totalSpent, 0))}</p>
             </div>
           </div>
         </div>
@@ -75,7 +77,7 @@ export default function Budgeting({ budgets, expenses, onAddBudget, onDeleteBudg
       {/* Category Budgets */}
       <div className="section-card section-hover p-8">
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-lg font-bold text-[#1e2a25]">Category Budgets</h3>
+          <h3 className="text-lg font-bold text-[#eef1ff]">Category Budgets</h3>
           <button
             onClick={() => setIsAdding(true)}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#1f6b55] to-[#245f56] text-white rounded-xl text-sm font-bold hover:from-[#1a5a49] hover:to-[#1f534b] transition-all shadow-lg shadow-[#9fb6a8]"
@@ -96,25 +98,25 @@ export default function Budgeting({ budgets, expenses, onAddBudget, onDeleteBudg
               >
                 <div className="space-y-4">
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#607066] mb-1 block">Category</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#1e2a25] mb-1 block">Category</label>
                     <select
                       value={newBudget.category}
                       onChange={(e) => setNewBudget({ ...newBudget, category: e.target.value })}
-                      className="w-full bg-white border border-[#d5e1d8] rounded-xl px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1f6b55]/20"
+                      className="w-full bg-white border border-[#d5e1d8] rounded-xl px-4 py-2 text-sm font-medium text-[#1e2a25] focus:outline-none focus:ring-2 focus:ring-[#1f6b55]/20"
                     >
                       {CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
+                        <option key={cat} value={cat} className="text-[#1e2a25]">{cat}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#607066] mb-1 block">Monthly Amount</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#1e2a25] mb-1 block">Monthly Amount</label>
                     <input
                       type="number"
                       value={newBudget.amount || ''}
                       onChange={(e) => setNewBudget({ ...newBudget, amount: parseFloat(e.target.value) })}
                       placeholder="0.00"
-                      className="w-full bg-white border border-[#d5e1d8] rounded-xl px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1f6b55]/20"
+                      className="w-full bg-white border border-[#d5e1d8] rounded-xl px-4 py-2 text-sm font-medium text-[#1e2a25] placeholder:text-[#999] focus:outline-none focus:ring-2 focus:ring-[#1f6b55]/20"
                     />
                   </div>
                   <div className="flex gap-2 pt-2">
@@ -159,8 +161,8 @@ export default function Budgeting({ budgets, expenses, onAddBudget, onDeleteBudg
                         <PieChart size={20} className="text-[#1f6b55]" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-[#1e2a25]">{budget.category}</p>
-                        <p className="text-[10px] text-[#607066] font-mono uppercase tracking-widest">Monthly Limit: ₹{budget.amount}</p>
+                        <p className="text-sm font-bold text-[#eef1ff]">{budget.category}</p>
+                        <p className="text-[10px] text-[#b8b9ea] font-mono uppercase tracking-widest">Monthly Limit: {formatAmount(budget.amount)}</p>
                       </div>
                     </div>
                     <button
@@ -173,10 +175,10 @@ export default function Budgeting({ budgets, expenses, onAddBudget, onDeleteBudg
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-[10px] font-bold">
-                      <span className={isOver ? "text-[#b44f48]" : "text-[#5f6f65]"}>
-                        Spent: ₹{spent.toLocaleString()}
+                      <span className={isOver ? "text-[#ff9999]" : "text-[#b8b9ea]"}>
+                        Spent: {formatAmount(spent)}
                       </span>
-                      <span className="text-[#79877f]">{Math.round(percentage)}%</span>
+                      <span className="text-[#b8b9ea]">{Math.round(percentage)}%</span>
                     </div>
                     <div className="h-1.5 bg-[#dce8df] rounded-full overflow-hidden">
                       <motion.div

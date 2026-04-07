@@ -10,6 +10,7 @@ import TagManagement from './components/TagManagement';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Expense, Budget, UserProfile, Tag } from './types';
 import { CATEGORIES } from './constants';
+import { useCurrency } from './context/CurrencyContext';
 import firebaseConfig from '../firebase-applet-config.json';
 import { 
   auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, 
@@ -283,18 +284,45 @@ export default function App() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#8f63f4] via-[#6e46e7] to-[#4f2dbe] relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-white/18 blur-3xl" />
-          <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-[#b997ff]/28 blur-3xl" />
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#2d1b4e] via-[#1a0f2e] to-[#0d0520] relative overflow-hidden">
+        {/* Animated background gradients */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Large gradient blob top-left */}
+          <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-gradient-to-br from-[#7b5cff]/40 via-[#5a4ff0]/20 to-transparent blur-3xl animate-pulse" />
+          
+          {/* Large gradient blob bottom-right */}
+          <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-gradient-to-tl from-[#2fbbff]/30 via-[#00d4ff]/15 to-transparent blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          
+          {/* Middle accent blob */}
+          <div className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full bg-gradient-to-br from-[#ff006e]/20 via-transparent to-transparent blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+
+          {/* Floating coins */}
+          <div className="absolute top-16 left-12 w-12 h-12 rounded-full bg-gradient-to-br from-[#ffd166] to-[#f8ad1e] shadow-lg shadow-[#ffd166]/50 animate-bounce" style={{ animationDelay: '0s' }} />
+          <div className="absolute top-1/4 right-20 w-10 h-10 rounded-full bg-gradient-to-br from-[#ffb347] to-[#ff9500] shadow-lg shadow-[#ff9500]/50 animate-bounce" style={{ animationDelay: '0.3s' }} />
+          <div className="absolute bottom-1/3 left-1/4 w-8 h-8 rounded-full bg-gradient-to-br from-[#ffa94d] to-[#ff8c42] shadow-lg shadow-[#ff8c42]/50 animate-bounce" style={{ animationDelay: '0.6s' }} />
+          <div className="absolute bottom-20 right-1/3 w-11 h-11 rounded-full bg-gradient-to-br from-[#ffd166] to-[#f8ad1e] shadow-lg shadow-[#ffd166]/50 animate-bounce" style={{ animationDelay: '0.2s' }} />
+
+          {/* Floating geometric shapes */}
+          <div className="absolute top-1/3 left-1/3 w-6 h-6 bg-gradient-to-br from-[#3a86ff] to-[#118ab2] rounded-lg shadow-lg shadow-[#3a86ff]/50 opacity-70 animate-bounce" style={{ animationDelay: '0.4s' }} />
+          <div className="absolute top-20 right-1/3 w-5 h-5 bg-gradient-to-br from-[#06d6a0] to-[#2a9d8f] rounded-full shadow-lg shadow-[#06d6a0]/50 opacity-70 animate-bounce" style={{ animationDelay: '0.1s' }} />
+          
+          {/* Floating cards/rectangles */}
+          <div className="absolute top-1/2 left-20 w-16 h-10 bg-gradient-to-br from-[#ff006e]/30 to-[#8338ec]/30 rounded-lg shadow-lg border border-[#ff006e]/40 backdrop-blur-sm animate-bounce" style={{ animationDelay: '0.7s' }} />
+          <div className="absolute bottom-1/4 right-1/4 w-14 h-8 bg-gradient-to-br from-[#3a86ff]/30 to-[#118ab2]/30 rounded-lg shadow-lg border border-[#3a86ff]/40 backdrop-blur-sm animate-bounce" style={{ animationDelay: '0.3s' }} />
+
+          {/* Floating lines/orbs */}
+          <div className="absolute top-1/4 right-12 w-3 h-3 rounded-full bg-[#2fbbff] shadow-lg shadow-[#2fbbff]/60 opacity-80 animate-pulse" />
+          <div className="absolute bottom-1/3 left-1/3 w-2 h-2 rounded-full bg-[#7b5cff] shadow-lg shadow-[#7b5cff]/60 opacity-80 animate-pulse" style={{ animationDelay: '0.5s' }} />
+          <div className="absolute top-1/2 right-1/4 w-4 h-4 rounded-full bg-[#06d6a0] shadow-lg shadow-[#06d6a0]/60 opacity-70 animate-pulse" style={{ animationDelay: '0.8s' }} />
         </div>
 
-        <div className="relative z-10 bg-gradient-to-br from-[#d8d0f0] via-[#d6d2ef] to-[#cdc5e8] p-12 rounded-[34px] border border-[#c2b9e1] shadow-[0_28px_70px_-30px_rgba(27,10,84,0.75)] max-w-md w-full text-center">
+        {/* Login Card */}
+        <div className="relative z-10 bg-gradient-to-br from-[#1f1a3f] via-[#2a2451] to-[#1a1735] p-12 rounded-[34px] border border-[#4a4580]/50 shadow-[0_28px_70px_-30px_rgba(27,10,84,0.75)] max-w-md w-full text-center backdrop-blur-md">
           <div className="w-20 h-20 bg-gradient-to-br from-[#7a54ef] to-[#6f46ea] text-white rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-[#6b45dd]/40">
             <ShieldAlert size={40} />
           </div>
-          <h1 className="text-3xl font-bold text-[#3a2e69] mb-2 tracking-tight">FinTrack AI</h1>
-          <p className="text-[#5d5189] mb-10 leading-relaxed">Securely manage your expenses and budgets with AI-powered insights.</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#eef1ff] to-[#d8d0f0] bg-clip-text text-transparent mb-2 tracking-tight">FinTrack AI</h1>
+          <p className="text-[#acade7] mb-10 leading-relaxed">Securely manage your expenses and budgets with AI-powered insights.</p>
           <button
             onClick={handleLogin}
             className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-[#7a54ef] via-[#6f46ea] to-[#5f34dd] text-white py-4 rounded-2xl font-bold hover:brightness-110 transition-all shadow-lg shadow-[#5b39c9]/45"
@@ -309,6 +337,7 @@ export default function App() {
   }
 
   const renderContent = () => {
+    const { formatAmount } = useCurrency();
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard expenses={expenses} budgets={budgets} onDeleteExpense={handleDeleteExpense} />;
@@ -340,7 +369,7 @@ export default function App() {
             <div className="section-card section-hover p-8">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-4">
-                  <h3 className="text-lg font-bold text-[#1d2a24]">All Transactions</h3>
+                  <h3 className="text-lg font-bold text-[#eef1ff]">All Transactions</h3>
                   <div className="flex bg-[#ecf2ed] p-1 rounded-xl">
                     <button 
                       onClick={() => setTagFilter('')}
@@ -394,21 +423,21 @@ export default function App() {
                           }}
                         />
                       </th>
-                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#6f7d75]">Date & Time</th>
-                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#6f7d75]">Merchant</th>
-                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#6f7d75]">Category</th>
-                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#6f7d75]">Amount</th>
-                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#6f7d75]">Payment</th>
-                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#6f7d75]">Status</th>
-                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#6f7d75]">Tags</th>
-                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#6f7d75] text-right">Actions</th>
+                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#b8b9ea]">Date & Time</th>
+                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#b8b9ea]">Merchant</th>
+                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#b8b9ea]">Category</th>
+                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#b8b9ea]">Amount</th>
+                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#b8b9ea]">Payment</th>
+                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#b8b9ea]">Status</th>
+                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#b8b9ea]">Tags</th>
+                      <th className="pb-4 text-[10px] font-bold uppercase tracking-widest text-[#b8b9ea] text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#ebf1eb]">
                     {sortedMonths.map(monthYear => (
                       <React.Fragment key={monthYear}>
                         <tr className="bg-[#f1f6f2]">
-                          <td colSpan={9} className="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-[#5f6d64]">
+                          <td colSpan={9} className="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-[#b8b9ea]">
                             {monthYear}
                           </td>
                         </tr>
@@ -429,17 +458,17 @@ export default function App() {
                               />
                             </td>
                             <td className="py-4">
-                              <div className="text-sm text-[#4f5d55]">{new Date(expense.date).toLocaleDateString()}</div>
-                              {expense.time && <div className="text-[10px] text-[#7b8880] font-mono">{expense.time}</div>}
+                              <div className="text-sm text-[#eef1ff]">{new Date(expense.date).toLocaleDateString()}</div>
+                              {expense.time && <div className="text-[10px] text-[#b8b9ea] font-mono">{expense.time}</div>}
                             </td>
-                            <td className="py-4 text-sm font-bold text-[#1f2d26]">{expense.merchant}</td>
-                            <td className="py-4 text-sm text-[#5f6d65]">{expense.category}</td>
+                            <td className="py-4 text-sm font-bold text-[#eef1ff]">{expense.merchant}</td>
+                            <td className="py-4 text-sm text-[#b8b9ea]">{expense.category}</td>
                             <td className="py-4 text-sm font-bold">
-                              <span className={expense.category === 'Money Received' || expense.tags.includes('#money-received') ? 'text-[#2d8a67]' : 'text-[#1f2d26]'}>
-                                {expense.category === 'Money Received' || expense.tags.includes('#money-received') ? '+' : '-'}₹{expense.amount.toFixed(2)}
+                              <span className={expense.category === 'Money Received' || expense.tags.includes('#money-received') ? 'text-[#2d8a67]' : 'text-[#eef1ff]'}>
+                                {expense.category === 'Money Received' || expense.tags.includes('#money-received') ? '+' : '-'}{formatAmount(expense.amount)}
                               </span>
                             </td>
-                            <td className="py-4 text-xs text-[#5f6d65]">{expense.paymentMethod || '-'}</td>
+                            <td className="py-4 text-xs text-[#b8b9ea]">{expense.paymentMethod || '-'}</td>
                             <td className="py-4">
                               <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                                 expense.status === 'completed' ? 'bg-[#e4f4ec] text-[#2d8a67]' : 

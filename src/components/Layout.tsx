@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { LayoutDashboard, Receipt, PieChart, BookOpen, LogOut, User, FileText, Tag as TagIcon } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import CurrencySelector from './CurrencySelector';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -87,6 +88,7 @@ export default function Layout({ children, activeTab, setActiveTab, user, onLogo
         <header className="h-16 bg-[#130f3d]/85 backdrop-blur-sm border-b border-[#2e2a73] flex items-center justify-between px-8 sticky top-0 z-10">
           <h2 className="text-lg font-semibold text-[#eef1ff] capitalize">{activeTab}</h2>
           <div className="flex items-center gap-4">
+            <CurrencySelector />
             <div className="text-xs font-mono text-[#acade7]">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </div>

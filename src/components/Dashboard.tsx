@@ -2,8 +2,10 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { TrendingUp, TrendingDown, Wallet, Target, ArrowUpRight, ArrowDownRight, Receipt, Trash2, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useMemo } from 'react';
 import { Expense, Budget } from '../types';
 import { CATEGORY_COLORS } from '../constants';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface DashboardProps {
   expenses: Expense[];
@@ -18,6 +20,7 @@ function getCategoryColor(category: string) {
 }
 
 export default function Dashboard({ expenses, budgets, onDeleteExpense }: DashboardProps) {
+  const { formatAmount, convertAmount, selectedCurrency } = useCurrency();
   const incomeTransactions = expenses.filter(e => e.category === 'Money Received' || e.tags.includes('#money-received'));
   const expenseTransactions = expenses.filter(e => !(e.category === 'Money Received' || e.tags.includes('#money-received')));
 
@@ -27,37 +30,43 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
   const totalBudget = budgets.reduce((acc, curr) => acc + curr.amount, 0);
 
   // Aggregate duplicate budget categories so the chart/legend shows each category only once.
-  const categoryData = Object.values(
-    budgets.reduce((acc: Record<string, { name: string; value: number; budget: number }>, budget) => {
-      if (!acc[budget.category]) {
-        acc[budget.category] = { name: budget.category, value: 0, budget: 0 };
-      }
+  const categoryData = useMemo(() => {
+    return Object.values(
+      budgets.reduce((acc: Record<string, { name: string; value: number; budget: number }>, budget) => {
+        if (!acc[budget.category]) {
+          acc[budget.category] = { name: budget.category, value: 0, budget: 0 };
+        }
 
-      const spent = expenseTransactions
-        .filter(e => e.category === budget.category)
-        .reduce((sum, curr) => sum + curr.amount, 0);
+        const spent = expenseTransactions
+          .filter(e => e.category === budget.category)
+          .reduce((sum, curr) => sum + curr.amount, 0);
 
-      acc[budget.category].value = spent;
-      acc[budget.category].budget += budget.amount;
-      return acc;
-    }, {})
-  );
+        acc[budget.category].value = convertAmount(spent);
+        acc[budget.category].budget += convertAmount(budget.amount);
+        return acc;
+      }, {})
+    );
+  }, [expenseTransactions, budgets, convertAmount, selectedCurrency]);
 
   const recentExpenses = [...expenses].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
 
-  const tagData = expenseTransactions.reduce((acc: { [key: string]: number }, curr) => {
-    curr.tags.forEach(tag => {
-      acc[tag] = (acc[tag] || 0) + curr.amount;
-    });
-    return acc;
-  }, {});
+  const tagData = useMemo(() => {
+    return expenseTransactions.reduce((acc: { [key: string]: number }, curr) => {
+      curr.tags.forEach(tag => {
+        acc[tag] = (acc[tag] || 0) + convertAmount(curr.amount);
+      });
+      return acc;
+    }, {});
+  }, [expenseTransactions, convertAmount, selectedCurrency]);
 
-  const sortedTags = Object.entries(tagData)
-    .sort(([, a], [, b]) => b - a)
-    .map(([name, value]) => ({ name, value }));
+  const sortedTags = useMemo(() => {
+    return Object.entries(tagData)
+      .sort(([, a], [, b]) => b - a)
+      .map(([name, value]) => ({ name, value }));
+  }, [tagData]);
 
-  const topTags = sortedTags.slice(0, 6);
-  const totalTagSpending = Object.values(tagData).reduce((a, b) => a + b, 0);
+  const topTags = useMemo(() => sortedTags.slice(0, 6), [sortedTags]);
+  const totalTagSpending = useMemo(() => Object.values(tagData).reduce((a, b) => a + b, 0), [tagData]);
 
   return (
     <div className="space-y-8">
@@ -65,7 +74,7 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           title="Total"
-          value={`₹${netBalance.toLocaleString()}`}
+          value={formatAmount(netBalance)}
           trend={netBalance >= 0 ? "Positive" : "Negative"}
           trendUp={netBalance >= 0}
           tone={0}
@@ -73,7 +82,7 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
         />
         <StatCard
           title="Total Money Received"
-          value={`₹${totalIncome.toLocaleString()}`}
+          value={formatAmount(totalIncome)}
           trend="This Month"
           trendUp={true}
           tone={1}
@@ -81,7 +90,7 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
         />
         <StatCard
           title="Total Money Transfer"
-          value={`₹${totalExpenses.toLocaleString()}`}
+          value={formatAmount(totalExpenses)}
           trend={`${totalBudget > 0 ? Math.round((totalExpenses / totalBudget) * 100) : 0}% of budget`}
           trendUp={totalExpenses <= totalBudget}
           tone={2}
@@ -134,7 +143,7 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
                   }}
                   itemStyle={{ color: '#eef1ff' }}
                   labelStyle={{ color: '#acade7' }}
-                  formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Spent']}
+                  formatter={(value: number) => [formatAmount(value), 'Spent']}
                 />
                 <Legend
                   verticalAlign="bottom"
@@ -171,7 +180,7 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
                     contentStyle={{ borderRadius: '12px', border: '1px solid #4f4797', backgroundColor: '#161348', boxShadow: '0 8px 20px rgba(0,0,0,0.45)' }}
                     itemStyle={{ color: '#eef1ff' }}
                     labelStyle={{ color: '#acade7' }}
-                    formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Spent']}
+                    formatter={(value: number) => [formatAmount(value), 'Spent']}
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} name="Spent">
                     {topTags.map((_, index) => (
@@ -197,7 +206,7 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
             <div>
               <p className="text-xs text-[#e1dcff] uppercase tracking-widest font-bold mb-1">Most Expensive Tag</p>
               <p className="text-2xl font-bold">{topTags[0]?.name || 'N/A'}</p>
-              <p className="text-sm text-[#e8e5ff] mt-1">₹{topTags[0]?.value.toLocaleString() || '0'} total</p>
+              <p className="text-sm text-[#e8e5ff] mt-1">{formatAmount(topTags[0]?.value || 0)} total</p>
             </div>
             <div className="h-px bg-white/10" />
             <div>
@@ -208,7 +217,7 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
             <div>
               <p className="text-xs text-[#e1dcff] uppercase tracking-widest font-bold mb-1">Avg. Spent per Tag</p>
               <p className="text-2xl font-bold">
-                ₹{sortedTags.length > 0 ? (totalTagSpending / sortedTags.length).toFixed(2) : '0.00'}
+                {formatAmount(sortedTags.length > 0 ? totalTagSpending / sortedTags.length : 0)}
               </p>
             </div>
           </div>
@@ -231,7 +240,7 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
                     <td className="py-4">
                       <span className="text-sm font-bold text-[#eef1ff] uppercase font-mono bg-[#292461] px-2 py-1 rounded-lg">{tag.name}</span>
                     </td>
-                    <td className="py-4 text-sm font-bold text-[#eef1ff]">₹{tag.value.toFixed(2)}</td>
+                    <td className="py-4 text-sm font-bold text-[#eef1ff]">{formatAmount(tag.value)}</td>
                     <td className="py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-1.5 bg-[#2f2a6e] rounded-full overflow-hidden">
@@ -266,11 +275,20 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={categoryData}>
                 <XAxis dataKey="name" fontSize={10} tick={{ fill: '#b8b9ea' }} />
-                <YAxis fontSize={10} tick={{ fill: '#b8b9ea' }} />
+                <YAxis 
+                  fontSize={10} 
+                  tick={{ fill: '#b8b9ea' }}
+                  width={80}
+                  tickFormatter={(value) => {
+                    if (value === 0) return '0';
+                    return `${selectedCurrency.symbol}${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+                  }}
+                />
                 <Tooltip
                   contentStyle={{ borderRadius: '12px', border: '1px solid #4f4797', backgroundColor: '#161348' }}
                   itemStyle={{ color: '#eef1ff' }}
                   labelStyle={{ color: '#acade7' }}
+                  formatter={(value: number) => [`${selectedCurrency.symbol}${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`, 'Amount']}
                 />
                 <Bar dataKey="budget" fill="#3f3a83" radius={[4, 4, 0, 0]} name="Budget" />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} name="Actual">
@@ -310,7 +328,7 @@ export default function Dashboard({ expenses, budgets, onDeleteExpense }: Dashbo
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <p className={`text-sm font-bold ${expense.category === 'Money Received' || expense.tags.includes('#money-received') ? 'text-[#59e7b0]' : 'text-[#eef1ff]'}`}>
-                      {expense.category === 'Money Received' || expense.tags.includes('#money-received') ? '+' : '-'}₹{expense.amount.toFixed(2)}
+                      {expense.category === 'Money Received' || expense.tags.includes('#money-received') ? '+' : '-'}{formatAmount(expense.amount)}
                     </p>
                     <div className="flex items-center gap-2 mt-1 justify-end">
                       <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
